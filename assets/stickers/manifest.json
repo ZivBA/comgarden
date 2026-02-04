@@ -1,0 +1,207 @@
+{
+  "categories": [
+    { "id": "trees-greenery", "label": "עצים וצמחייה", "icon": "🌿" },
+    { "id": "food-growing", "label": "גידולים", "icon": "🥕" },
+    { "id": "structures-paths", "label": "מבנים ושבילים", "icon": "🏗️" },
+    { "id": "water-nature", "label": "מים וטבע", "icon": "💧" },
+    { "id": "furniture-amenities", "label": "ריהוט ואביזרים", "icon": "🪑" }
+  ],
+  "stickers": [
+    {
+      "id": "large-tree",
+      "file": "trees-greenery/large-tree.svg",
+      "label": "עץ גדול",
+      "category": "trees-greenery",
+      "defaultScale": 1.0
+    },
+    {
+      "id": "sapling",
+      "file": "trees-greenery/sapling.svg",
+      "label": "שתיל",
+      "category": "trees-greenery",
+      "defaultScale": 0.7
+    },
+    {
+      "id": "bush",
+      "file": "trees-greenery/bush.svg",
+      "label": "שיח",
+      "category": "trees-greenery",
+      "defaultScale": 0.8
+    },
+    {
+      "id": "flower-bed-rect",
+      "file": "trees-greenery/flower-bed-rect.svg",
+      "label": "ערוגת פרחים מלבנית",
+      "category": "trees-greenery",
+      "defaultScale": 1.0
+    },
+    {
+      "id": "flower-bed-circle",
+      "file": "trees-greenery/flower-bed-circle.svg",
+      "label": "ערוגת פרחים עגולה",
+      "category": "trees-greenery",
+      "defaultScale": 0.9
+    },
+    {
+      "id": "grass-patch",
+      "file": "trees-greenery/grass-patch.svg",
+      "label": "משטח דשא",
+      "category": "trees-greenery",
+      "defaultScale": 1.2
+    },
+    {
+      "id": "raised-bed",
+      "file": "food-growing/raised-bed.svg",
+      "label": "ערוגה מוגבהת",
+      "category": "food-growing",
+      "defaultScale": 1.0
+    },
+    {
+      "id": "herb-planter",
+      "file": "food-growing/herb-planter.svg",
+      "label": "אדנית תבלינים",
+      "category": "food-growing",
+      "defaultScale": 0.8
+    },
+    {
+      "id": "fruit-tree",
+      "file": "food-growing/fruit-tree.svg",
+      "label": "עץ פרי",
+      "category": "food-growing",
+      "defaultScale": 0.9
+    },
+    {
+      "id": "greenhouse",
+      "file": "food-growing/greenhouse.svg",
+      "label": "חממה",
+      "category": "food-growing",
+      "defaultScale": 1.2
+    },
+    {
+      "id": "compost-bin",
+      "file": "food-growing/compost-bin.svg",
+      "label": "פח קומפוסט",
+      "category": "food-growing",
+      "defaultScale": 0.6
+    },
+    {
+      "id": "pergola",
+      "file": "structures-paths/pergola.svg",
+      "label": "פרגולה",
+      "category": "structures-paths",
+      "defaultScale": 1.1
+    },
+    {
+      "id": "gazebo",
+      "file": "structures-paths/gazebo.svg",
+      "label": "גזיבו",
+      "category": "structures-paths",
+      "defaultScale": 1.0
+    },
+    {
+      "id": "paved-walkway",
+      "file": "structures-paths/paved-walkway.svg",
+      "label": "שביל מרוצף",
+      "category": "structures-paths",
+      "defaultScale": 1.0
+    },
+    {
+      "id": "wooden-deck",
+      "file": "structures-paths/wooden-deck.svg",
+      "label": "דק עץ",
+      "category": "structures-paths",
+      "defaultScale": 1.0
+    },
+    {
+      "id": "fence",
+      "file": "structures-paths/fence.svg",
+      "label": "גדר",
+      "category": "structures-paths",
+      "defaultScale": 1.0
+    },
+    {
+      "id": "shed",
+      "file": "structures-paths/shed.svg",
+      "label": "מחסן",
+      "category": "structures-paths",
+      "defaultScale": 0.9
+    },
+    {
+      "id": "fountain",
+      "file": "water-nature/fountain.svg",
+      "label": "מזרקה",
+      "category": "water-nature",
+      "defaultScale": 0.8
+    },
+    {
+      "id": "wading-pool",
+      "file": "water-nature/wading-pool.svg",
+      "label": "בריכת שכשוך",
+      "category": "water-nature",
+      "defaultScale": 1.0
+    },
+    {
+      "id": "bird-bath",
+      "file": "water-nature/bird-bath.svg",
+      "label": "אמבט ציפורים",
+      "category": "water-nature",
+      "defaultScale": 0.5
+    },
+    {
+      "id": "bird-feeder",
+      "file": "water-nature/bird-feeder.svg",
+      "label": "מאכיל ציפורים",
+      "category": "water-nature",
+      "defaultScale": 0.4
+    },
+    {
+      "id": "fire-pit",
+      "file": "water-nature/fire-pit.svg",
+      "label": "מדורה",
+      "category": "water-nature",
+      "defaultScale": 0.7
+    },
+    {
+      "id": "bench",
+      "file": "furniture-amenities/bench.svg",
+      "label": "ספסל",
+      "category": "furniture-amenities",
+      "defaultScale": 0.7
+    },
+    {
+      "id": "picnic-table",
+      "file": "furniture-amenities/picnic-table.svg",
+      "label": "שולחן פיקניק",
+      "category": "furniture-amenities",
+      "defaultScale": 0.9
+    },
+    {
+      "id": "outdoor-kitchen",
+      "file": "furniture-amenities/outdoor-kitchen.svg",
+      "label": "מטבח חוץ",
+      "category": "furniture-amenities",
+      "defaultScale": 1.0
+    },
+    {
+      "id": "waste-bin",
+      "file": "furniture-amenities/waste-bin.svg",
+      "label": "פח אשפה",
+      "category": "furniture-amenities",
+      "defaultScale": 0.4
+    },
+    {
+      "id": "garden-lamp",
+      "file": "furniture-amenities/garden-lamp.svg",
+      "label": "מנורת גן",
+      "category": "furniture-amenities",
+      "defaultScale": 0.5
+    },
+    {
+      "id": "play-equipment",
+      "file": "furniture-amenities/play-equipment.svg",
+      "label": "מתקן משחק",
+      "category": "furniture-amenities",
+      "defaultScale": 1.1
+    }
+  ]
+}
