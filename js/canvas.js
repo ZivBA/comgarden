@@ -32,7 +32,7 @@ export async function initCanvas() {
 
     // Initialize Fabric canvas
     canvas = new fabric.Canvas('garden-canvas', {
-        selection: true,
+        selection: false,  // Disable group selection rectangle
         preserveObjectStacking: true,
         allowTouchScrolling: false,
         stopContextMenu: true,
@@ -117,85 +117,8 @@ async function loadBackgroundImage() {
 function setupTouchGestures() {
     let lastPinchDistance = 0;
     let isPinching = false;
+    let isPanning = false;
     let lastPanPoint = null;
-    let isDraggingObject = false;
-
-    // Track when we're dragging an object vs panning
-    canvas.on('mouse:down', (opt) => {
-        isDraggingObject = !!opt.target;
-    });
-
-    canvas.on('mouse:up', () => {
-        isPinching = false;
-        lastPinchDistance = 0;
-        lastPanPoint = null;
-        isDraggingObject = false;
-    });
-
-    // Handle touch events directly on the canvas upper element for better mobile support
-    const upperCanvas = canvas.upperCanvasEl;
-
-    upperCanvas.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 2) {
-            isPinching = true;
-            e.preventDefault();
-        }
-    }, { passive: false });
-
-    upperCanvas.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 2) {
-            // Pinch zoom
-            isPinching = true;
-            const touch1 = e.touches[0];
-            const touch2 = e.touches[1];
-
-            const distance = Math.hypot(
-                touch2.clientX - touch1.clientX,
-                touch2.clientY - touch1.clientY
-            );
-
-            if (lastPinchDistance > 0) {
-                const delta = distance / lastPinchDistance;
-                const currentZoom = canvas.getZoom();
-                let newZoom = currentZoom * delta;
-
-                // Clamp zoom
-                newZoom = Math.max(CONFIG.minZoom, Math.min(CONFIG.maxZoom, newZoom));
-
-                // Get canvas bounding rect for proper coordinate calculation
-                const rect = upperCanvas.getBoundingClientRect();
-                const centerX = ((touch1.clientX + touch2.clientX) / 2) - rect.left;
-                const centerY = ((touch1.clientY + touch2.clientY) / 2) - rect.top;
-
-                canvas.zoomToPoint({ x: centerX, y: centerY }, newZoom);
-            }
-
-            lastPinchDistance = distance;
-            e.preventDefault();
-        } else if (e.touches.length === 1 && !isDraggingObject && !isPinching) {
-            // Single finger pan (only when not dragging an object)
-            const touch = e.touches[0];
-            const rect = upperCanvas.getBoundingClientRect();
-            const point = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-
-            if (lastPanPoint) {
-                const vpt = canvas.viewportTransform;
-                vpt[4] += point.x - lastPanPoint.x;
-                vpt[5] += point.y - lastPanPoint.y;
-                canvas.setViewportTransform(vpt);
-                canvas.requestRenderAll();
-            }
-
-            lastPanPoint = point;
-            e.preventDefault();
-        }
-    }, { passive: false });
-
-    upperCanvas.addEventListener('touchend', () => {
-        isPinching = false;
-        lastPinchDistance = 0;
-        lastPanPoint = null;
-    });
 
     // Mouse wheel zoom for desktop
     canvas.on('mouse:wheel', (opt) => {
@@ -209,34 +132,115 @@ function setupTouchGestures() {
         opt.e.stopPropagation();
     });
 
-    // Desktop panning with middle mouse or shift+drag
-    let isDesktopPanning = false;
-    let desktopPanStart = null;
-
+    // Desktop: Pan when clicking on empty space, shift+drag, or middle mouse
     canvas.on('mouse:down', (opt) => {
-        // Middle mouse button (button 1) or shift+click for panning
-        if (opt.e.button === 1 || (opt.e.shiftKey && !opt.target)) {
-            isDesktopPanning = true;
-            desktopPanStart = { x: opt.e.clientX, y: opt.e.clientY };
-            canvas.selection = false;
-            opt.e.preventDefault();
+        const e = opt.e;
+        // Pan if: no target clicked, OR shift key held, OR middle mouse button
+        if (!opt.target || e.shiftKey || e.button === 1) {
+            isPanning = true;
+            lastPanPoint = { x: e.clientX, y: e.clientY };
+            canvas.setCursor('grabbing');
         }
     });
 
     canvas.on('mouse:move', (opt) => {
-        if (isDesktopPanning && desktopPanStart) {
+        if (isPanning && lastPanPoint) {
+            const e = opt.e;
             const vpt = canvas.viewportTransform;
-            vpt[4] += opt.e.clientX - desktopPanStart.x;
-            vpt[5] += opt.e.clientY - desktopPanStart.y;
+            vpt[4] += e.clientX - lastPanPoint.x;
+            vpt[5] += e.clientY - lastPanPoint.y;
             canvas.setViewportTransform(vpt);
-            desktopPanStart = { x: opt.e.clientX, y: opt.e.clientY };
+            lastPanPoint = { x: e.clientX, y: e.clientY };
         }
     });
 
     canvas.on('mouse:up', () => {
-        isDesktopPanning = false;
-        desktopPanStart = null;
-        canvas.selection = true;
+        isPanning = false;
+        lastPanPoint = null;
+        canvas.setCursor('default');
+    });
+
+    // Mobile touch handling - use Fabric events to not interfere with object manipulation
+    let touchStartTarget = null;
+
+    canvas.on('mouse:down', (opt) => {
+        // Track if we started on an object (for mobile)
+        touchStartTarget = opt.target;
+    });
+
+    // For pinch zoom, we need direct touch events
+    const upperCanvas = canvas.upperCanvasEl;
+
+    upperCanvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            isPinching = true;
+            lastPinchDistance = 0;
+            // Don't preventDefault here - let Fabric.js process it too
+        }
+    }, { passive: true });
+
+    upperCanvas.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+            // Pinch zoom
+            isPinching = true;
+            isPanning = false;
+
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const distance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+
+            if (lastPinchDistance > 0) {
+                const delta = distance / lastPinchDistance;
+                const currentZoom = canvas.getZoom();
+                let newZoom = currentZoom * delta;
+                newZoom = Math.max(CONFIG.minZoom, Math.min(CONFIG.maxZoom, newZoom));
+
+                const rect = upperCanvas.getBoundingClientRect();
+                const centerX = ((touch1.clientX + touch2.clientX) / 2) - rect.left;
+                const centerY = ((touch1.clientY + touch2.clientY) / 2) - rect.top;
+
+                canvas.zoomToPoint({ x: centerX, y: centerY }, newZoom);
+            }
+
+            lastPinchDistance = distance;
+            e.preventDefault();
+        } else if (e.touches.length === 1 && !touchStartTarget && !isPinching) {
+            // Single finger pan - only if we didn't start on an object
+            if (!isPanning) {
+                isPanning = true;
+                const touch = e.touches[0];
+                lastPanPoint = { x: touch.clientX, y: touch.clientY };
+            }
+
+            const touch = e.touches[0];
+            const point = { x: touch.clientX, y: touch.clientY };
+
+            if (lastPanPoint) {
+                const vpt = canvas.viewportTransform;
+                vpt[4] += point.x - lastPanPoint.x;
+                vpt[5] += point.y - lastPanPoint.y;
+                canvas.setViewportTransform(vpt);
+            }
+
+            lastPanPoint = point;
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    upperCanvas.addEventListener('touchend', (e) => {
+        if (e.touches.length === 0) {
+            isPinching = false;
+            isPanning = false;
+            lastPinchDistance = 0;
+            lastPanPoint = null;
+            touchStartTarget = null;
+        } else if (e.touches.length === 1) {
+            isPinching = false;
+            lastPinchDistance = 0;
+        }
     });
 }
 
