@@ -145,12 +145,19 @@ export async function placeSticker(sticker) {
         fabric.loadSVGFromString(svgContent, (objects, options) => {
             const svgGroup = fabric.util.groupSVGElements(objects, options);
 
-            // Calculate size
-            const scale = (CONFIG.defaultSize / Math.max(svgGroup.width, svgGroup.height)) * sticker.defaultScale;
+            // Get current zoom level
+            const zoom = canvas.getZoom();
 
-            // Position at canvas center
-            const centerX = canvas.getWidth() / 2;
-            const centerY = canvas.getHeight() / 2;
+            // Calculate size - divide by zoom so stickers appear same size regardless of zoom
+            const scale = (CONFIG.defaultSize / Math.max(svgGroup.width, svgGroup.height)) * sticker.defaultScale / zoom;
+
+            // Get viewport center in canvas coordinates
+            const vpt = canvas.viewportTransform;
+            const viewportCenterX = canvas.getWidth() / 2;
+            const viewportCenterY = canvas.getHeight() / 2;
+            // Convert viewport center to canvas coordinates (inverse transform)
+            const centerX = (viewportCenterX - vpt[4]) / zoom;
+            const centerY = (viewportCenterY - vpt[5]) / zoom;
 
             svgGroup.set({
                 left: centerX,

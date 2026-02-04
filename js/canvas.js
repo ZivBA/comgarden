@@ -118,11 +118,32 @@ function setupTouchGestures() {
     let lastPinchDistance = 0;
     let isPinching = false;
     let lastPanPoint = null;
+    let isDraggingObject = false;
 
-    canvas.on('touch:gesture', (opt) => {
-        const e = opt.e;
+    // Track when we're dragging an object vs panning
+    canvas.on('mouse:down', (opt) => {
+        isDraggingObject = !!opt.target;
+    });
 
-        if (e.touches && e.touches.length === 2) {
+    canvas.on('mouse:up', () => {
+        isPinching = false;
+        lastPinchDistance = 0;
+        lastPanPoint = null;
+        isDraggingObject = false;
+    });
+
+    // Handle touch events directly on the canvas upper element for better mobile support
+    const upperCanvas = canvas.upperCanvasEl;
+
+    upperCanvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            isPinching = true;
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    upperCanvas.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
             // Pinch zoom
             isPinching = true;
             const touch1 = e.touches[0];
@@ -141,44 +162,42 @@ function setupTouchGestures() {
                 // Clamp zoom
                 newZoom = Math.max(CONFIG.minZoom, Math.min(CONFIG.maxZoom, newZoom));
 
-                // Zoom toward pinch center
-                const centerX = (touch1.clientX + touch2.clientX) / 2;
-                const centerY = (touch1.clientY + touch2.clientY) / 2;
+                // Get canvas bounding rect for proper coordinate calculation
+                const rect = upperCanvas.getBoundingClientRect();
+                const centerX = ((touch1.clientX + touch2.clientX) / 2) - rect.left;
+                const centerY = ((touch1.clientY + touch2.clientY) / 2) - rect.top;
 
                 canvas.zoomToPoint({ x: centerX, y: centerY }, newZoom);
             }
 
             lastPinchDistance = distance;
-        }
-    });
-
-    canvas.on('touch:drag', (opt) => {
-        if (isPinching) return;
-
-        const e = opt.e;
-        if (e.touches && e.touches.length === 1 && !canvas.getActiveObject()) {
-            // Pan (only when no object selected)
+            e.preventDefault();
+        } else if (e.touches.length === 1 && !isDraggingObject && !isPinching) {
+            // Single finger pan (only when not dragging an object)
             const touch = e.touches[0];
-            const point = { x: touch.clientX, y: touch.clientY };
+            const rect = upperCanvas.getBoundingClientRect();
+            const point = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
 
             if (lastPanPoint) {
                 const vpt = canvas.viewportTransform;
                 vpt[4] += point.x - lastPanPoint.x;
                 vpt[5] += point.y - lastPanPoint.y;
+                canvas.setViewportTransform(vpt);
                 canvas.requestRenderAll();
             }
 
             lastPanPoint = point;
+            e.preventDefault();
         }
-    });
+    }, { passive: false });
 
-    canvas.on('mouse:up', () => {
+    upperCanvas.addEventListener('touchend', () => {
         isPinching = false;
         lastPinchDistance = 0;
         lastPanPoint = null;
     });
 
-    // Also handle mouse wheel for desktop
+    // Mouse wheel zoom for desktop
     canvas.on('mouse:wheel', (opt) => {
         const delta = opt.e.deltaY;
         let zoom = canvas.getZoom();
@@ -188,6 +207,36 @@ function setupTouchGestures() {
         canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
         opt.e.preventDefault();
         opt.e.stopPropagation();
+    });
+
+    // Desktop panning with middle mouse or shift+drag
+    let isDesktopPanning = false;
+    let desktopPanStart = null;
+
+    canvas.on('mouse:down', (opt) => {
+        // Middle mouse button (button 1) or shift+click for panning
+        if (opt.e.button === 1 || (opt.e.shiftKey && !opt.target)) {
+            isDesktopPanning = true;
+            desktopPanStart = { x: opt.e.clientX, y: opt.e.clientY };
+            canvas.selection = false;
+            opt.e.preventDefault();
+        }
+    });
+
+    canvas.on('mouse:move', (opt) => {
+        if (isDesktopPanning && desktopPanStart) {
+            const vpt = canvas.viewportTransform;
+            vpt[4] += opt.e.clientX - desktopPanStart.x;
+            vpt[5] += opt.e.clientY - desktopPanStart.y;
+            canvas.setViewportTransform(vpt);
+            desktopPanStart = { x: opt.e.clientX, y: opt.e.clientY };
+        }
+    });
+
+    canvas.on('mouse:up', () => {
+        isDesktopPanning = false;
+        desktopPanStart = null;
+        canvas.selection = true;
     });
 }
 
