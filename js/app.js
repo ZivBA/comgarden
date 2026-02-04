@@ -5,6 +5,7 @@
  */
 
 import { initCanvas, getCanvas, resetZoom } from './canvas.js';
+import { loadManifest, displayCategory } from './stickers.js';
 
 // Application state
 const state = {
@@ -23,6 +24,13 @@ async function init() {
         // Initialize canvas
         await initCanvas();
         console.log('ComGarden: Canvas initialized');
+
+        // Load sticker manifest
+        await loadManifest();
+        console.log('ComGarden: Stickers loaded');
+
+        // Display initial category
+        await displayCategory(state.selectedCategory);
 
         // Check for first-time user
         checkFirstTimeUser();
@@ -95,7 +103,7 @@ function setupUIEvents() {
 /**
  * Handle category tab change
  */
-function handleCategoryChange(tab) {
+async function handleCategoryChange(tab) {
     // Remove active from all tabs
     document.querySelectorAll('#category-tabs .tab').forEach(t => {
         t.classList.remove('active');
@@ -110,7 +118,8 @@ function handleCategoryChange(tab) {
     state.currentMode = 'place';
     state.selectedCategory = tab.dataset.category;
 
-    // TODO: Load stickers for this category
+    // Load stickers for this category
+    await displayCategory(state.selectedCategory);
     console.log('Category changed:', state.selectedCategory);
 }
 
