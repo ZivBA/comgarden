@@ -146,10 +146,12 @@ function setupTouchGestures() {
     canvas.on('mouse:move', (opt) => {
         if (isPanning && lastPanPoint) {
             const e = opt.e;
-            const vpt = canvas.viewportTransform;
+            // Create a copy of the viewport transform to avoid issues
+            const vpt = canvas.viewportTransform.slice();
             vpt[4] += e.clientX - lastPanPoint.x;
             vpt[5] += e.clientY - lastPanPoint.y;
             canvas.setViewportTransform(vpt);
+            canvas.requestRenderAll();
             lastPanPoint = { x: e.clientX, y: e.clientY };
         }
     });
@@ -162,20 +164,24 @@ function setupTouchGestures() {
 
     // Mobile touch handling - use Fabric events to not interfere with object manipulation
     let touchStartTarget = null;
+    let mobilePanStartPoint = null;
 
     canvas.on('mouse:down', (opt) => {
         // Track if we started on an object (for mobile)
         touchStartTarget = opt.target;
     });
 
-    // For pinch zoom, we need direct touch events
+    // For pinch zoom and mobile pan, we need direct touch events
     const upperCanvas = canvas.upperCanvasEl;
 
     upperCanvas.addEventListener('touchstart', (e) => {
         if (e.touches.length === 2) {
             isPinching = true;
             lastPinchDistance = 0;
-            // Don't preventDefault here - let Fabric.js process it too
+        } else if (e.touches.length === 1) {
+            // Store the starting point for potential pan
+            const touch = e.touches[0];
+            mobilePanStartPoint = { x: touch.clientX, y: touch.clientY };
         }
     }, { passive: true });
 
@@ -207,25 +213,28 @@ function setupTouchGestures() {
 
             lastPinchDistance = distance;
             e.preventDefault();
-        } else if (e.touches.length === 1 && !touchStartTarget && !isPinching) {
+        } else if (e.touches.length === 1 && !touchStartTarget && !isPinching && mobilePanStartPoint) {
             // Single finger pan - only if we didn't start on an object
-            if (!isPanning) {
-                isPanning = true;
-                const touch = e.touches[0];
-                lastPanPoint = { x: touch.clientX, y: touch.clientY };
-            }
-
             const touch = e.touches[0];
-            const point = { x: touch.clientX, y: touch.clientY };
+            const currentPoint = { x: touch.clientX, y: touch.clientY };
 
-            if (lastPanPoint) {
-                const vpt = canvas.viewportTransform;
-                vpt[4] += point.x - lastPanPoint.x;
-                vpt[5] += point.y - lastPanPoint.y;
+            // Calculate delta from the last known point (or start point)
+            const refPoint = lastPanPoint || mobilePanStartPoint;
+            const deltaX = currentPoint.x - refPoint.x;
+            const deltaY = currentPoint.y - refPoint.y;
+
+            // Only pan if we have valid deltas
+            if (isFinite(deltaX) && isFinite(deltaY)) {
+                // Create a copy of the viewport transform
+                const vpt = canvas.viewportTransform.slice();
+                vpt[4] += deltaX;
+                vpt[5] += deltaY;
                 canvas.setViewportTransform(vpt);
+                canvas.requestRenderAll();
             }
 
-            lastPanPoint = point;
+            lastPanPoint = currentPoint;
+            isPanning = true;
             e.preventDefault();
         }
     }, { passive: false });
@@ -237,6 +246,7 @@ function setupTouchGestures() {
             lastPinchDistance = 0;
             lastPanPoint = null;
             touchStartTarget = null;
+            mobilePanStartPoint = null;
         } else if (e.touches.length === 1) {
             isPinching = false;
             lastPinchDistance = 0;
