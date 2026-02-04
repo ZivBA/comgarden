@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 40">
+  <title>שיח</title>
+  <!-- Bush - top-down oval shape -->
+  <ellipse cx="25" cy="20" rx="23" ry="18" fill="#558B2F"/>
+  <ellipse cx="18" cy="15" rx="8" ry="8" fill="#689F38"/>
+  <ellipse cx="32" cy="16" rx="7" ry="7" fill="#7CB342"/>
+  <ellipse cx="25" cy="26" rx="9" ry="9" fill="#689F38"/>
+</svg>
