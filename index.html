@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>גן קהילתי — תכנון חזון</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Top Bar -->
+    <header id="top-bar">
+        <button id="btn-undo" class="top-btn" aria-label="בטל">↩️ בטל</button>
+        <button id="btn-help" class="top-btn" aria-label="עזרה">?</button>
+        <button id="btn-share" class="top-btn primary" aria-label="שיתוף">שיתוף 📤</button>
+    </header>
+
+    <!-- Main Canvas Area -->
+    <main id="canvas-container">
+        <canvas id="garden-canvas"></canvas>
+    </main>
+
+    <!-- Bottom Panel -->
+    <footer id="bottom-panel">
+        <!-- Category Tabs -->
+        <nav id="category-tabs" role="tablist">
+            <button class="tab active" data-category="trees-greenery" role="tab" aria-selected="true">🌿</button>
+            <button class="tab" data-category="food-growing" role="tab">🥕</button>
+            <button class="tab" data-category="structures-paths" role="tab">🏗️</button>
+            <button class="tab" data-category="water-nature" role="tab">💧</button>
+            <button class="tab" data-category="furniture-amenities" role="tab">🪑</button>
+            <div class="tab-divider"></div>
+            <button class="tab tool" data-tool="draw" role="tab">✏️</button>
+            <button class="tab tool" data-tool="text" role="tab">T</button>
+        </nav>
+
+        <!-- Sticker Strip -->
+        <div id="sticker-strip" role="listbox" aria-label="מדבקות">
+            <!-- Stickers loaded dynamically -->
+        </div>
+    </footer>
+
+    <!-- Onboarding Overlay (hidden by default) -->
+    <div id="onboarding-overlay" class="overlay hidden">
+        <div class="overlay-content">
+            <h2>👋 ברוכים הבאים!</h2>
+            <ol>
+                <li>בחרו מדבקה מלמטה ⬇️</li>
+                <li>גררו אותה לתמונה</li>
+                <li>צבטו לזום, סובבו בשתי אצבעות</li>
+            </ol>
+            <button id="btn-start" class="btn-primary">יאללה, מתחילים!</button>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
