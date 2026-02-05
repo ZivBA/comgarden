@@ -56,6 +56,11 @@ export async function initCanvas() {
     // Handle double-tap to reset zoom
     setupDoubleTapReset();
 
+    // Expose canvas for e2e tests
+    if (typeof window !== 'undefined') {
+        window.fabricCanvas = canvas;
+    }
+
     return canvas;
 }
 
