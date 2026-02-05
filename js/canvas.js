@@ -191,6 +191,11 @@ function setupTouchGestures() {
     upperCanvas.addEventListener('touchstart', (e) => {
         isTouchActive = true;  // Mark that we're handling touch
 
+        // Skip gesture handling when in drawing mode - let Fabric handle it
+        if (canvas.isDrawingMode) {
+            return;
+        }
+
         // Check if we're touching an object using Fabric's method
         const rect = upperCanvas.getBoundingClientRect();
         const touch = e.touches[0];
@@ -215,6 +220,11 @@ function setupTouchGestures() {
     }, { passive: true });
 
     upperCanvas.addEventListener('touchmove', (e) => {
+        // Skip gesture handling when in drawing mode - let Fabric handle it
+        if (canvas.isDrawingMode) {
+            return;
+        }
+
         if (e.touches.length === 2) {
             // Pinch zoom
             isPinching = true;

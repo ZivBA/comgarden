@@ -192,6 +192,29 @@ export function getDrawColor() {
 }
 
 /**
+ * Set color for both drawing and text (unified color state)
+ * @param {string} color - CSS color value
+ * @param {fabric.Canvas} canvas - Canvas to apply to
+ */
+export function setToolColor(color, canvas) {
+    currentDrawColor = color;
+
+    if (canvas) {
+        // Apply to drawing brush if in draw mode
+        if (canvas.isDrawingMode && canvas.freeDrawingBrush) {
+            canvas.freeDrawingBrush.color = color;
+        }
+
+        // Apply to selected text object if any
+        const activeObj = canvas.getActiveObject();
+        if (activeObj && activeObj.type === 'i-text') {
+            activeObj.set('fill', color);
+            canvas.renderAll();
+        }
+    }
+}
+
+/**
  * Get current draw width
  * @returns {number} Current brush width
  */

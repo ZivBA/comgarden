@@ -12,7 +12,15 @@
     <!-- Top Bar -->
     <header id="top-bar">
         <button id="btn-undo" class="top-btn" aria-label="בטל">↩️ בטל</button>
-        <button id="btn-help" class="top-btn" aria-label="עזרה">?</button>
+        <button id="btn-clear" class="top-btn danger" aria-label="נקה">🗑️ נקה</button>
+        <div id="help-menu-container">
+            <button id="btn-help" class="top-btn" aria-label="עזרה" aria-haspopup="true" aria-expanded="false">?</button>
+            <div id="help-menu" class="dropdown-menu hidden" role="menu">
+                <button class="menu-item" data-action="show-tutorial" role="menuitem">📖 הדרכה</button>
+                <button class="menu-item" data-action="reset-garden" role="menuitem">🗑️ מחק הכל</button>
+                <button class="menu-item" data-action="about" role="menuitem">ℹ️ אודות</button>
+            </div>
+        </div>
         <button id="btn-share" class="top-btn primary" aria-label="שיתוף">שיתוף 📤</button>
     </header>
 
@@ -43,15 +51,34 @@
 
     <!-- Onboarding Overlay (hidden by default) -->
     <div id="onboarding-overlay" class="overlay hidden">
-        <div class="overlay-content">
+        <div class="overlay-content animated">
             <h2>👋 ברוכים הבאים!</h2>
+            <p class="subtitle">תכננו את הגינה הקהילתית שלכם</p>
             <ol>
-                <li>בחרו מדבקה מלמטה ⬇️</li>
-                <li>גררו אותה לתמונה</li>
-                <li>צבטו לזום, סובבו בשתי אצבעות</li>
+                <li><span class="step-icon">👆</span> בחרו מדבקה מלמטה</li>
+                <li><span class="step-icon">✋</span> גררו אותה לתמונה</li>
+                <li><span class="step-icon">🤏</span> צבטו לזום, החליקו לגלול</li>
+                <li><span class="step-icon">📤</span> שתפו את התוצאה!</li>
             </ol>
-            <button id="btn-start" class="btn-primary">יאללה, מתחילים!</button>
+            <button id="btn-start" class="btn-primary pulse">יאללה, מתחילים!</button>
         </div>
+    </div>
+
+    <!-- Contextual Hints -->
+    <div id="hint-container" class="hidden" aria-live="polite">
+        <div id="hint-content"></div>
+        <button id="hint-dismiss" aria-label="סגור">✕</button>
+    </div>
+
+    <!-- Color Picker for Draw/Text -->
+    <div id="color-picker" class="hidden" role="toolbar" aria-label="בחירת צבע">
+        <button class="color-btn active" data-color="#000000" style="background:#000000" aria-label="שחור"></button>
+        <button class="color-btn" data-color="#FF0000" style="background:#FF0000" aria-label="אדום"></button>
+        <button class="color-btn" data-color="#00AA00" style="background:#00AA00" aria-label="ירוק"></button>
+        <button class="color-btn" data-color="#0066FF" style="background:#0066FF" aria-label="כחול"></button>
+        <button class="color-btn" data-color="#FF9900" style="background:#FF9900" aria-label="כתום"></button>
+        <button class="color-btn" data-color="#9933FF" style="background:#9933FF" aria-label="סגול"></button>
+        <button class="color-btn" data-color="#FFFFFF" style="background:#FFFFFF" aria-label="לבן"></button>
     </div>
 
     <!-- Toast Container -->

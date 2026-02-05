@@ -341,9 +341,8 @@ html, body {
     }
 }
 
-/* Color Picker (for draw mode) */
+/* Color Picker (for draw/text mode) */
 #color-picker {
-    display: none;
     position: fixed;
     bottom: calc(var(--bottom-panel-height) + var(--spacing-sm));
     left: 50%;
@@ -353,23 +352,43 @@ html, body {
     border-radius: 24px;
     box-shadow: var(--shadow-md);
     z-index: var(--z-panel);
-}
-
-#color-picker.visible {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
 }
 
-.color-option {
-    width: 32px;
-    height: 32px;
+#color-picker.hidden {
+    display: none;
+}
+
+.color-btn {
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border: 2px solid transparent;
+    border: 3px solid transparent;
     cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
-.color-option.active {
-    border-color: var(--color-text);
+.color-btn:hover {
+    transform: scale(1.1);
+}
+
+.color-btn.active {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-primary);
+}
+
+.color-btn[data-color="#FFFFFF"] {
+    border: 2px solid var(--color-border);
+}
+
+/* Danger button style */
+.top-btn.danger {
+    color: #d32f2f;
+}
+
+.top-btn.danger:hover {
+    background: rgba(211, 47, 47, 0.1);
 }
 
 /* Loading State */
@@ -388,4 +407,152 @@ html, body {
     #canvas-container {
         bottom: calc(var(--bottom-panel-height) + env(safe-area-inset-bottom));
     }
+}
+
+/* ============================================
+   Help Menu Dropdown
+   ============================================ */
+#help-menu-container {
+    position: relative;
+}
+
+#help-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--spacing-xs);
+    background: var(--color-surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    min-width: 150px;
+    overflow: hidden;
+    z-index: var(--z-overlay);
+}
+
+#help-menu.hidden {
+    display: none;
+}
+
+.menu-item {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    background: transparent;
+    text-align: right;
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.menu-item:hover,
+.menu-item:focus {
+    background: var(--color-background);
+}
+
+.menu-item:active {
+    background: var(--color-border);
+}
+
+/* ============================================
+   Enhanced Onboarding Animations
+   ============================================ */
+.overlay-content.animated {
+    animation: slide-up 0.4s ease-out;
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.overlay-content .subtitle {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+}
+
+.overlay-content .step-icon {
+    display: inline-block;
+    width: 24px;
+    text-align: center;
+    margin-left: var(--spacing-xs);
+}
+
+.btn-primary.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+    }
+}
+
+/* ============================================
+   Contextual Hints
+   ============================================ */
+#hint-container {
+    position: fixed;
+    bottom: calc(var(--bottom-panel-height) + var(--spacing-lg));
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-text);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    padding-left: calc(var(--spacing-md) + 28px);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    max-width: 280px;
+    z-index: var(--z-toast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    animation: hint-in 0.3s ease-out;
+}
+
+#hint-container.hidden {
+    display: none;
+}
+
+@keyframes hint-in {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+#hint-content {
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+}
+
+#hint-dismiss {
+    position: absolute;
+    left: var(--spacing-xs);
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+}
+
+#hint-dismiss:hover {
+    color: white;
 }
