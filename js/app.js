@@ -14,6 +14,7 @@ import {
     initHistoryHooks,
     undo
 } from './tools.js';
+import { shareImage, canShare } from './share.js';
 
 // Application state
 const state = {
@@ -220,10 +221,25 @@ function handleUndo() {
 /**
  * Handle share button click
  */
-function handleShare() {
-    // TODO: Implement export and share
-    console.log('Share clicked');
-    showToast('שיתוף בקרוב...');
+async function handleShare() {
+    showToast('מייצא תמונה...');
+
+    const result = await shareImage();
+
+    if (result.success) {
+        if (result.method === 'share') {
+            showToast('התמונה שותפה בהצלחה! 🎉');
+        } else {
+            showToast('התמונה הורדה בהצלחה! 📥');
+        }
+    } else {
+        if (result.error?.name === 'AbortError') {
+            // User cancelled - no message needed
+            return;
+        }
+        showToast('שגיאה בייצוא התמונה. נסו שוב.');
+        console.error('Share failed:', result.error);
+    }
 }
 
 /**
