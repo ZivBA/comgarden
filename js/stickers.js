@@ -14,6 +14,7 @@ import { showToast, getState } from './app.js';
 
 let manifest = null;
 const svgCache = new Map();
+let hintsVisible = true; // Show hints by default when switching categories
 
 // Configuration
 const CONFIG = {
@@ -63,6 +64,9 @@ export async function displayCategory(categoryId) {
     // Clear current stickers
     strip.innerHTML = '';
 
+    // Reset hints visibility when switching categories
+    hintsVisible = true;
+
     // Get stickers for this category
     const stickers = getStickersForCategory(categoryId);
 
@@ -79,31 +83,47 @@ export async function displayCategory(categoryId) {
         item.setAttribute('aria-label', sticker.label);
         item.dataset.stickerId = sticker.id;
 
+        // Create name hint label
+        const nameHint = document.createElement('span');
+        nameHint.className = 'sticker-name-hint';
+        nameHint.textContent = sticker.label;
+        item.appendChild(nameHint);
+
+        // Create SVG container
+        const svgContainer = document.createElement('div');
+        svgContainer.className = 'sticker-svg';
+
         // Load and display SVG
         try {
             const svgContent = await loadSVG(sticker.file);
-            item.innerHTML = svgContent;
+            svgContainer.innerHTML = svgContent;
         } catch (error) {
             // Fallback to placeholder
-            item.innerHTML = `<span style="font-size: 24px;">📍</span>`;
-            item.setAttribute('title', `${sticker.label} (לא נטען)`);
+            svgContainer.innerHTML = `<span style="font-size: 24px;">📍</span>`;
         }
 
-        // Click to place sticker
-        item.addEventListener('click', () => placeSticker(sticker));
+        item.appendChild(svgContainer);
 
-        // Long press for tooltip
-        let pressTimer;
-        item.addEventListener('touchstart', () => {
-            pressTimer = setTimeout(() => {
-                showToast(sticker.label, 1500);
-            }, 500);
+        // Click to place sticker and hide all hints
+        item.addEventListener('click', () => {
+            hideAllHints();
+            placeSticker(sticker);
         });
-        item.addEventListener('touchend', () => clearTimeout(pressTimer));
-        item.addEventListener('touchmove', () => clearTimeout(pressTimer));
 
         strip.appendChild(item);
     }
+}
+
+/**
+ * Hide all sticker name hints
+ */
+function hideAllHints() {
+    if (!hintsVisible) return;
+
+    document.querySelectorAll('.sticker-name-hint').forEach(hint => {
+        hint.classList.add('hidden');
+    });
+    hintsVisible = false;
 }
 
 /**

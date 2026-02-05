@@ -556,3 +556,50 @@ html, body {
 #hint-dismiss:hover {
     color: white;
 }
+
+/* ============================================
+   Sticker Name Hints
+   ============================================ */
+.sticker-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sticker-name-hint {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-text);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 5;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.sticker-name-hint::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--color-text);
+}
+
+.sticker-name-hint.hidden {
+    opacity: 0;
+}
+
+.sticker-svg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
