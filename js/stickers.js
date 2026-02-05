@@ -199,9 +199,9 @@ export async function placeSticker(sticker) {
                 originY: 'center',
                 scaleX: scale,
                 scaleY: scale,
-                // Enable controls
-                hasControls: true,
-                hasBorders: true,
+                // Start without controls - tap to enable
+                hasControls: false,
+                hasBorders: false,
                 lockUniScaling: false,
                 // Custom data
                 stickerId: sticker.id,
@@ -209,7 +209,8 @@ export async function placeSticker(sticker) {
             });
 
             canvas.add(svgGroup);
-            canvas.setActiveObject(svgGroup);
+            // Don't select immediately - let user tap to select
+            canvas.discardActiveObject();
             canvas.renderAll();
 
             // Show first-time hint

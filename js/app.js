@@ -337,7 +337,8 @@ function handleClear() {
     }
 
     if (confirm('האם למחוק את כל המדבקות והציורים?')) {
-        canvas.clear();
+        // Remove all objects but keep background image
+        canvas.getObjects().forEach(obj => canvas.remove(obj));
         canvas.renderAll();
         clearSavedState();
         showToast('הגינה נוקתה! 🌱');
@@ -475,7 +476,8 @@ function confirmResetGarden() {
     if (confirm('האם למחוק את כל המדבקות? לא ניתן לבטל פעולה זו.')) {
         const canvas = getCanvas();
         if (canvas) {
-            canvas.clear();
+            // Remove all objects but keep background image
+            canvas.getObjects().forEach(obj => canvas.remove(obj));
             canvas.renderAll();
         }
         clearSavedState();

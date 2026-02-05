@@ -63,6 +63,9 @@ export async function initCanvas() {
     // Handle double-tap to reset zoom
     setupDoubleTapReset();
 
+    // Handle tap-to-toggle controls on objects
+    setupTapToToggleControls();
+
     // Expose canvas for e2e tests
     if (typeof window !== 'undefined') {
         window.fabricCanvas = canvas;
@@ -312,6 +315,64 @@ function setupDoubleTapReset() {
         }
 
         lastTap = now;
+    });
+}
+
+/**
+ * Set up tap-to-toggle controls on objects
+ * Tap an object to select it and show controls
+ * Tap again or tap elsewhere to deselect and hide controls
+ */
+function setupTapToToggleControls() {
+    // When an object is selected, show its controls
+    canvas.on('selection:created', (opt) => {
+        const obj = opt.selected?.[0];
+        if (obj) {
+            obj.set({
+                hasControls: true,
+                hasBorders: true
+            });
+            canvas.renderAll();
+        }
+    });
+
+    // When selection changes to a different object
+    canvas.on('selection:updated', (opt) => {
+        // Hide controls on deselected objects
+        opt.deselected?.forEach(obj => {
+            obj.set({
+                hasControls: false,
+                hasBorders: false
+            });
+        });
+        // Show controls on newly selected object
+        const obj = opt.selected?.[0];
+        if (obj) {
+            obj.set({
+                hasControls: true,
+                hasBorders: true
+            });
+        }
+        canvas.renderAll();
+    });
+
+    // When selection is cleared, hide controls on all objects
+    canvas.on('selection:cleared', (opt) => {
+        opt.deselected?.forEach(obj => {
+            obj.set({
+                hasControls: false,
+                hasBorders: false
+            });
+        });
+        canvas.renderAll();
+    });
+
+    // Tap on empty space to deselect
+    canvas.on('mouse:down', (opt) => {
+        if (!opt.target) {
+            canvas.discardActiveObject();
+            canvas.renderAll();
+        }
     });
 }
 
