@@ -6,6 +6,14 @@
 
 import { initCanvas, getCanvas, resetZoom } from './canvas.js';
 import { loadManifest, displayCategory } from './stickers.js';
+import {
+    initDrawMode,
+    exitDrawMode,
+    initTextMode,
+    exitTextMode,
+    initHistoryHooks,
+    undo
+} from './tools.js';
 
 // Application state
 const state = {
@@ -24,6 +32,11 @@ async function init() {
         // Initialize canvas
         await initCanvas();
         console.log('ComGarden: Canvas initialized');
+
+        // Initialize history hooks for undo functionality
+        const canvas = getCanvas();
+        initHistoryHooks(canvas);
+        console.log('ComGarden: History hooks initialized');
 
         // Load sticker manifest
         await loadManifest();
@@ -104,6 +117,11 @@ function setupUIEvents() {
  * Handle category tab change
  */
 async function handleCategoryChange(tab) {
+    const canvas = getCanvas();
+
+    // Exit any active tool mode before switching to category
+    exitCurrentMode(canvas);
+
     // Remove active from all tabs
     document.querySelectorAll('#category-tabs .tab').forEach(t => {
         t.classList.remove('active');
@@ -128,6 +146,10 @@ async function handleCategoryChange(tab) {
  */
 function handleToolChange(tab) {
     const tool = tab.dataset.tool;
+    const canvas = getCanvas();
+
+    // Exit current mode before switching
+    exitCurrentMode(canvas);
 
     // Toggle if same tool clicked
     if (state.currentMode === tool) {
@@ -152,17 +174,37 @@ function handleToolChange(tab) {
     // Update state
     state.currentMode = tool;
 
-    // TODO: Enable draw or text mode on canvas
+    // Enable the selected tool mode
+    if (tool === 'draw') {
+        initDrawMode(canvas);
+    } else if (tool === 'text') {
+        initTextMode(canvas);
+    }
+
     console.log('Mode changed:', state.currentMode);
+}
+
+/**
+ * Exit current drawing or text mode
+ * @param {fabric.Canvas} canvas
+ */
+function exitCurrentMode(canvas) {
+    if (state.currentMode === 'draw') {
+        exitDrawMode(canvas);
+    } else if (state.currentMode === 'text') {
+        exitTextMode(canvas);
+    }
 }
 
 /**
  * Handle undo button click
  */
 function handleUndo() {
-    // TODO: Implement undo from history
-    console.log('Undo clicked');
-    showToast('פעולת ביטול בקרוב...');
+    const canvas = getCanvas();
+    const success = undo(canvas);
+    if (!success) {
+        showToast('אין פעולות לביטול');
+    }
 }
 
 /**
