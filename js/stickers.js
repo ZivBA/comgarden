@@ -127,11 +127,12 @@ function hideAllHints() {
 }
 
 /**
- * Load an SVG file (with caching)
+ * Load an SVG file (with caching and retry)
  * @param {string} filePath - Relative path from stickers folder
+ * @param {number} retries - Number of retry attempts (default: 2)
  * @returns {Promise<string>} SVG content
  */
-async function loadSVG(filePath) {
+async function loadSVG(filePath, retries = 2) {
     const fullPath = CONFIG.stickerBasePath + filePath;
 
     // Check cache
@@ -139,13 +140,25 @@ async function loadSVG(filePath) {
         return svgCache.get(fullPath);
     }
 
-    const response = await fetch(fullPath);
-    if (!response.ok) throw new Error(`Failed to load ${fullPath}`);
+    let lastError;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const response = await fetch(fullPath);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const svgContent = await response.text();
-    svgCache.set(fullPath, svgContent);
+            const svgContent = await response.text();
+            svgCache.set(fullPath, svgContent);
+            return svgContent;
+        } catch (error) {
+            lastError = error;
+            if (attempt < retries) {
+                // Wait before retry (exponential backoff)
+                await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
+            }
+        }
+    }
 
-    return svgContent;
+    throw new Error(`Failed to load ${fullPath} after ${retries + 1} attempts: ${lastError?.message}`);
 }
 
 /**

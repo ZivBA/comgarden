@@ -362,7 +362,26 @@ function saveState() {
                 viewportTransform: canvas.viewportTransform,
                 timestamp: Date.now()
             };
-            localStorage.setItem(CONFIG.storageKey, JSON.stringify(state));
+            const stateString = JSON.stringify(state);
+
+            // Try to save, handle quota exceeded
+            try {
+                localStorage.setItem(CONFIG.storageKey, stateString);
+            } catch (quotaError) {
+                // Storage quota exceeded - try to clear old data
+                if (quotaError.name === 'QuotaExceededError' ||
+                    quotaError.code === 22 || // Safari
+                    quotaError.code === 1014) { // Firefox
+                    console.warn('Storage quota exceeded, clearing old state');
+                    localStorage.removeItem(CONFIG.storageKey);
+                    // Try again with fresh storage
+                    try {
+                        localStorage.setItem(CONFIG.storageKey, stateString);
+                    } catch (retryError) {
+                        console.error('Storage still failed after clearing:', retryError);
+                    }
+                }
+            }
         } catch (error) {
             console.warn('Failed to save canvas state:', error);
         }

@@ -47,10 +47,47 @@ const state = {
 };
 
 /**
+ * Check browser compatibility
+ * @returns {boolean} True if browser meets requirements
+ */
+function checkBrowserCompatibility() {
+    const issues = [];
+
+    // Check for required features
+    if (!window.fabric) {
+        issues.push('ספריית Fabric.js לא נטענה');
+    }
+
+    if (!('localStorage' in window)) {
+        issues.push('אין תמיכה ב-localStorage');
+    }
+
+    if (!document.createElement('canvas').getContext) {
+        issues.push('אין תמיכה ב-Canvas');
+    }
+
+    if (!('fetch' in window)) {
+        issues.push('אין תמיכה ב-Fetch API');
+    }
+
+    // Show warnings but don't block
+    if (issues.length > 0) {
+        console.warn('Compatibility issues:', issues);
+        showToast('הדפדפן שלכם עשוי שלא לתמוך בכל התכונות', 5000);
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * Initialize the application
  */
 async function init() {
     console.log('ComGarden: Initializing...');
+
+    // Check browser compatibility (non-blocking)
+    checkBrowserCompatibility();
 
     try {
         // Initialize canvas
