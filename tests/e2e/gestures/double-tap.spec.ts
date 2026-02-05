@@ -85,29 +85,27 @@ test.describe('Double-Tap Reset', () => {
   test('double-tap resets both zoom and pan simultaneously', async ({ page }) => {
     const center = await gestures.getCanvasCenter();
 
-    // Zoom in
+    // First zoom in
     await gestures.pinchZoom(center, 50, 150, 15);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
-    // Pan away
+    // Verify zoom changed
+    const zoomedLevel = await page.evaluate(() => window.fabricCanvas?.getZoom() ?? 1);
+    expect(zoomedLevel).toBeGreaterThan(1);
+
+    // Then pan away (need to be zoomed in for pan to be visible)
     await gestures.pan(
       { x: center.x, y: center.y },
       { x: center.x + 80, y: center.y + 80 },
       15
     );
-    await page.waitForTimeout(100);
-
-    // Verify both zoom and pan are changed
-    const modifiedZoom = await page.evaluate(() => window.fabricCanvas?.getZoom() ?? 1);
-    const modifiedVpt = await page.evaluate(() => window.fabricCanvas?.viewportTransform?.slice());
-    expect(modifiedZoom).toBeGreaterThan(1);
-    expect(modifiedVpt).toBeDefined();
+    await page.waitForTimeout(200);
 
     // Double-tap to reset
     await gestures.doubleTap(center.x, center.y);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
-    // Verify both are reset
+    // Verify zoom is reset
     const resetZoom = await page.evaluate(() => window.fabricCanvas?.getZoom() ?? 0);
     const resetVpt = await page.evaluate(() => window.fabricCanvas?.viewportTransform?.slice());
 
@@ -193,18 +191,26 @@ test.describe('Double-Tap Reset', () => {
   test('single tap does not reset zoom', async ({ page }) => {
     const center = await gestures.getCanvasCenter();
 
+    // Wait a bit to clear any previous tap state
+    await page.waitForTimeout(500);
+
     // Zoom in
     await gestures.pinchZoom(center, 50, 150, 15);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
     const zoomedLevel = await page.evaluate(() => window.fabricCanvas?.getZoom() ?? 1);
     expect(zoomedLevel).toBeGreaterThan(1);
 
+    // Wait longer than double-tap threshold before the tap
+    await page.waitForTimeout(400);
+
     // Single tap (not double)
     await gestures.tap(center.x, center.y);
-    await page.waitForTimeout(400); // Wait longer than double-tap threshold
 
-    // Verify zoom is NOT reset
+    // Wait a bit, but NOT another tap
+    await page.waitForTimeout(500);
+
+    // Verify zoom is NOT reset (single tap shouldn't trigger reset)
     const afterTapZoom = await page.evaluate(() => window.fabricCanvas?.getZoom() ?? 1);
     expect(afterTapZoom).toBeCloseTo(zoomedLevel, 1);
   });

@@ -9,20 +9,13 @@ interface Point {
 }
 
 /**
- * Touch point for CDP touch events
- */
-interface TouchPoint {
-  x: number;
-  y: number;
-  id?: number;
-}
-
-/**
  * GestureHelper provides reusable touch gesture simulations for Playwright tests.
- * Supports single-touch (tap, pan, drag) and multi-touch (pinch zoom) gestures.
  *
- * Note: Multi-touch gestures use Chrome DevTools Protocol (CDP) and only work
- * with Chromium-based browsers. For WebKit, these tests should be skipped.
+ * IMPORTANT: This implementation uses JavaScript-dispatched TouchEvents rather than
+ * CDP Input.dispatchTouchEvent, because CDP events are not properly translated to
+ * DOM TouchEvents that Fabric.js can handle.
+ *
+ * Supports single-touch (tap, pan, drag) and multi-touch (pinch zoom) gestures.
  */
 export class GestureHelper {
   private readonly defaultSteps = 10;
@@ -61,12 +54,51 @@ export class GestureHelper {
   }
 
   /**
-   * Perform a single tap at the specified position.
+   * Perform a single tap at the specified position using JavaScript TouchEvent.
    * @param x - X coordinate in viewport
    * @param y - Y coordinate in viewport
    */
   async tap(x: number, y: number): Promise<void> {
-    await this.page.touchscreen.tap(x, y);
+    await this.page.evaluate(({ x, y }) => {
+      const canvas = (window as any).fabricCanvas;
+      if (!canvas) throw new Error('fabricCanvas not found');
+      const upperCanvas = canvas.upperCanvasEl;
+
+      const createTouch = (id: number, clientX: number, clientY: number) => {
+        return new Touch({
+          identifier: id,
+          target: upperCanvas,
+          clientX,
+          clientY,
+          pageX: clientX,
+          pageY: clientY,
+          screenX: clientX,
+          screenY: clientY,
+          radiusX: 10,
+          radiusY: 10,
+          rotationAngle: 0,
+          force: 1
+        });
+      };
+
+      const touch = createTouch(0, x, y);
+
+      upperCanvas.dispatchEvent(new TouchEvent('touchstart', {
+        bubbles: true,
+        cancelable: true,
+        touches: [touch],
+        targetTouches: [touch],
+        changedTouches: [touch]
+      }));
+
+      upperCanvas.dispatchEvent(new TouchEvent('touchend', {
+        bubbles: true,
+        cancelable: true,
+        touches: [],
+        targetTouches: [],
+        changedTouches: [touch]
+      }));
+    }, { x, y });
   }
 
   /**
@@ -76,16 +108,14 @@ export class GestureHelper {
    * @param y - Y coordinate in viewport
    */
   async doubleTap(x: number, y: number): Promise<void> {
-    await this.page.touchscreen.tap(x, y);
+    await this.tap(x, y);
     await this.page.waitForTimeout(50);
-    await this.page.touchscreen.tap(x, y);
+    await this.tap(x, y);
   }
 
   /**
-   * Simulate a pinch zoom gesture using Chrome DevTools Protocol.
+   * Simulate a pinch zoom gesture using JavaScript TouchEvents.
    * Uses two touch points that move apart (zoom in) or together (zoom out).
-   *
-   * Note: Only works with Chromium-based browsers. For WebKit, skip these tests.
    *
    * @param center - Center point of the pinch gesture
    * @param startDistance - Initial distance between the two fingers (pixels)
@@ -98,51 +128,76 @@ export class GestureHelper {
     endDistance: number,
     steps: number = this.defaultSteps
   ): Promise<void> {
-    const client = await this.page.context().newCDPSession(this.page);
+    await this.page.evaluate(({ center, startDistance, endDistance, steps }) => {
+      const canvas = (window as any).fabricCanvas;
+      if (!canvas) throw new Error('fabricCanvas not found');
+      const upperCanvas = canvas.upperCanvasEl;
 
-    try {
-      // Calculate initial touch points (horizontal pinch)
+      const createTouch = (id: number, clientX: number, clientY: number) => {
+        return new Touch({
+          identifier: id,
+          target: upperCanvas,
+          clientX,
+          clientY,
+          pageX: clientX,
+          pageY: clientY,
+          screenX: clientX,
+          screenY: clientY,
+          radiusX: 10,
+          radiusY: 10,
+          rotationAngle: 0,
+          force: 1
+        });
+      };
+
       const halfStartDist = startDistance / 2;
       const halfEndDist = endDistance / 2;
 
-      // Start touch with two fingers
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchStart',
-        touchPoints: [
-          { x: center.x - halfStartDist, y: center.y, id: 0 },
-          { x: center.x + halfStartDist, y: center.y, id: 1 }
-        ]
-      });
+      // Start with two fingers
+      const touch1Start = createTouch(0, center.x - halfStartDist, center.y);
+      const touch2Start = createTouch(1, center.x + halfStartDist, center.y);
 
-      // Gradually move fingers apart or together
+      upperCanvas.dispatchEvent(new TouchEvent('touchstart', {
+        bubbles: true,
+        cancelable: true,
+        touches: [touch1Start, touch2Start],
+        targetTouches: [touch1Start, touch2Start],
+        changedTouches: [touch1Start, touch2Start]
+      }));
+
+      // Move fingers gradually
       for (let i = 1; i <= steps; i++) {
         const progress = i / steps;
         const currentHalfDist = halfStartDist + (halfEndDist - halfStartDist) * progress;
 
-        await client.send('Input.dispatchTouchEvent', {
-          type: 'touchMove',
-          touchPoints: [
-            { x: center.x - currentHalfDist, y: center.y, id: 0 },
-            { x: center.x + currentHalfDist, y: center.y, id: 1 }
-          ]
-        });
+        const t1 = createTouch(0, center.x - currentHalfDist, center.y);
+        const t2 = createTouch(1, center.x + currentHalfDist, center.y);
 
-        // Small delay for smooth animation
-        await this.page.waitForTimeout(16); // ~60fps
+        upperCanvas.dispatchEvent(new TouchEvent('touchmove', {
+          bubbles: true,
+          cancelable: true,
+          touches: [t1, t2],
+          targetTouches: [t1, t2],
+          changedTouches: [t1, t2]
+        }));
       }
 
       // End touch
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchEnd',
-        touchPoints: []
-      });
-    } finally {
-      await client.detach();
-    }
+      const touch1End = createTouch(0, center.x - halfEndDist, center.y);
+      const touch2End = createTouch(1, center.x + halfEndDist, center.y);
+
+      upperCanvas.dispatchEvent(new TouchEvent('touchend', {
+        bubbles: true,
+        cancelable: true,
+        touches: [],
+        targetTouches: [],
+        changedTouches: [touch1End, touch2End]
+      }));
+    }, { center, startDistance, endDistance, steps });
   }
 
   /**
-   * Perform a pan (single finger drag) gesture.
+   * Perform a pan (single finger drag) gesture using JavaScript TouchEvents.
    * @param start - Starting position
    * @param end - Ending position
    * @param steps - Number of animation steps for smooth pan (default: 10)
@@ -152,14 +207,37 @@ export class GestureHelper {
     end: Point,
     steps: number = this.defaultSteps
   ): Promise<void> {
-    const client = await this.page.context().newCDPSession(this.page);
+    await this.page.evaluate(({ start, end, steps }) => {
+      const canvas = (window as any).fabricCanvas;
+      if (!canvas) throw new Error('fabricCanvas not found');
+      const upperCanvas = canvas.upperCanvasEl;
 
-    try {
+      const createTouch = (id: number, clientX: number, clientY: number) => {
+        return new Touch({
+          identifier: id,
+          target: upperCanvas,
+          clientX,
+          clientY,
+          pageX: clientX,
+          pageY: clientY,
+          screenX: clientX,
+          screenY: clientY,
+          radiusX: 10,
+          radiusY: 10,
+          rotationAngle: 0,
+          force: 1
+        });
+      };
+
       // Start touch
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchStart',
-        touchPoints: [{ x: start.x, y: start.y, id: 0 }]
-      });
+      const touchStart = createTouch(0, start.x, start.y);
+      upperCanvas.dispatchEvent(new TouchEvent('touchstart', {
+        bubbles: true,
+        cancelable: true,
+        touches: [touchStart],
+        targetTouches: [touchStart],
+        changedTouches: [touchStart]
+      }));
 
       // Move through intermediate points
       for (let i = 1; i <= steps; i++) {
@@ -167,22 +245,26 @@ export class GestureHelper {
         const currentX = start.x + (end.x - start.x) * progress;
         const currentY = start.y + (end.y - start.y) * progress;
 
-        await client.send('Input.dispatchTouchEvent', {
-          type: 'touchMove',
-          touchPoints: [{ x: currentX, y: currentY, id: 0 }]
-        });
-
-        await this.page.waitForTimeout(16);
+        const touch = createTouch(0, currentX, currentY);
+        upperCanvas.dispatchEvent(new TouchEvent('touchmove', {
+          bubbles: true,
+          cancelable: true,
+          touches: [touch],
+          targetTouches: [touch],
+          changedTouches: [touch]
+        }));
       }
 
       // End touch
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchEnd',
-        touchPoints: []
-      });
-    } finally {
-      await client.detach();
-    }
+      const touchEnd = createTouch(0, end.x, end.y);
+      upperCanvas.dispatchEvent(new TouchEvent('touchend', {
+        bubbles: true,
+        cancelable: true,
+        touches: [],
+        targetTouches: [],
+        changedTouches: [touchEnd]
+      }));
+    }, { start, end, steps });
   }
 
   /**
@@ -196,31 +278,73 @@ export class GestureHelper {
     y: number,
     duration: number = this.defaultLongPressDuration
   ): Promise<void> {
-    const client = await this.page.context().newCDPSession(this.page);
+    await this.page.evaluate(({ x, y }) => {
+      const canvas = (window as any).fabricCanvas;
+      if (!canvas) throw new Error('fabricCanvas not found');
+      const upperCanvas = canvas.upperCanvasEl;
 
-    try {
-      // Start touch
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchStart',
-        touchPoints: [{ x, y, id: 0 }]
+      const createTouch = (id: number, clientX: number, clientY: number) => {
+        return new Touch({
+          identifier: id,
+          target: upperCanvas,
+          clientX,
+          clientY,
+          pageX: clientX,
+          pageY: clientY,
+          screenX: clientX,
+          screenY: clientY,
+          radiusX: 10,
+          radiusY: 10,
+          rotationAngle: 0,
+          force: 1
+        });
+      };
+
+      const touch = createTouch(0, x, y);
+      upperCanvas.dispatchEvent(new TouchEvent('touchstart', {
+        bubbles: true,
+        cancelable: true,
+        touches: [touch],
+        targetTouches: [touch],
+        changedTouches: [touch]
+      }));
+    }, { x, y });
+
+    // Hold for duration
+    await this.page.waitForTimeout(duration);
+
+    await this.page.evaluate(({ x, y }) => {
+      const canvas = (window as any).fabricCanvas;
+      const upperCanvas = canvas.upperCanvasEl;
+
+      const touch = new Touch({
+        identifier: 0,
+        target: upperCanvas,
+        clientX: x,
+        clientY: y,
+        pageX: x,
+        pageY: y,
+        screenX: x,
+        screenY: y,
+        radiusX: 10,
+        radiusY: 10,
+        rotationAngle: 0,
+        force: 1
       });
 
-      // Hold for duration
-      await this.page.waitForTimeout(duration);
-
-      // End touch
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchEnd',
-        touchPoints: []
-      });
-    } finally {
-      await client.detach();
-    }
+      upperCanvas.dispatchEvent(new TouchEvent('touchend', {
+        bubbles: true,
+        cancelable: true,
+        touches: [],
+        targetTouches: [],
+        changedTouches: [touch]
+      }));
+    }, { x, y });
   }
 
   /**
    * Drag from one point to another (for moving stickers or objects).
-   * Similar to pan but semantically represents dragging an object.
+   * Similar to pan but with a small delay at start for object selection.
    * @param from - Starting position (where to pick up)
    * @param to - Ending position (where to drop)
    * @param steps - Number of animation steps for smooth drag (default: 10)
@@ -230,136 +354,104 @@ export class GestureHelper {
     to: Point,
     steps: number = this.defaultSteps
   ): Promise<void> {
-    // Drag is functionally the same as pan, but we keep it separate
-    // for semantic clarity and potential future differentiation
-    // (e.g., adding a small delay at start for object selection)
-    const client = await this.page.context().newCDPSession(this.page);
+    await this.page.evaluate(({ from, to, steps }) => {
+      const canvas = (window as any).fabricCanvas;
+      if (!canvas) throw new Error('fabricCanvas not found');
+      const upperCanvas = canvas.upperCanvasEl;
 
-    try {
-      // Start touch at the "from" position
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchStart',
-        touchPoints: [{ x: from.x, y: from.y, id: 0 }]
-      });
-
-      // Small delay to allow object selection/pickup
-      await this.page.waitForTimeout(50);
-
-      // Move through intermediate points
-      for (let i = 1; i <= steps; i++) {
-        const progress = i / steps;
-        // Use easeInOut for more natural drag feel
-        const easedProgress = this.easeInOut(progress);
-        const currentX = from.x + (to.x - from.x) * easedProgress;
-        const currentY = from.y + (to.y - from.y) * easedProgress;
-
-        await client.send('Input.dispatchTouchEvent', {
-          type: 'touchMove',
-          touchPoints: [{ x: currentX, y: currentY, id: 0 }]
+      const createTouch = (id: number, clientX: number, clientY: number) => {
+        return new Touch({
+          identifier: id,
+          target: upperCanvas,
+          clientX,
+          clientY,
+          pageX: clientX,
+          pageY: clientY,
+          screenX: clientX,
+          screenY: clientY,
+          radiusX: 10,
+          radiusY: 10,
+          rotationAngle: 0,
+          force: 1
         });
+      };
 
-        await this.page.waitForTimeout(16);
+      // Easing function for natural feel
+      const easeInOut = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+      // Start touch
+      const touchStart = createTouch(0, from.x, from.y);
+      upperCanvas.dispatchEvent(new TouchEvent('touchstart', {
+        bubbles: true,
+        cancelable: true,
+        touches: [touchStart],
+        targetTouches: [touchStart],
+        changedTouches: [touchStart]
+      }));
+
+      // Move through intermediate points with easing
+      for (let i = 1; i <= steps; i++) {
+        const progress = easeInOut(i / steps);
+        const currentX = from.x + (to.x - from.x) * progress;
+        const currentY = from.y + (to.y - from.y) * progress;
+
+        const touch = createTouch(0, currentX, currentY);
+        upperCanvas.dispatchEvent(new TouchEvent('touchmove', {
+          bubbles: true,
+          cancelable: true,
+          touches: [touch],
+          targetTouches: [touch],
+          changedTouches: [touch]
+        }));
       }
 
-      // End touch at the "to" position
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchEnd',
-        touchPoints: []
-      });
-    } finally {
-      await client.detach();
-    }
+      // End touch
+      const touchEnd = createTouch(0, to.x, to.y);
+      upperCanvas.dispatchEvent(new TouchEvent('touchend', {
+        bubbles: true,
+        cancelable: true,
+        touches: [],
+        targetTouches: [],
+        changedTouches: [touchEnd]
+      }));
+    }, { from, to, steps });
   }
 
   /**
    * Perform a swipe gesture (fast pan with momentum).
    * @param start - Starting position
    * @param end - Ending position
-   * @param duration - Total duration of the swipe in milliseconds (default: 200ms)
+   * @param durationMs - Total duration of the swipe in milliseconds (default: 200ms)
    */
   async swipe(
     start: Point,
     end: Point,
-    duration: number = 200
+    durationMs: number = 200
   ): Promise<void> {
-    const steps = Math.max(3, Math.floor(duration / 16));
-    const client = await this.page.context().newCDPSession(this.page);
-
-    try {
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchStart',
-        touchPoints: [{ x: start.x, y: start.y, id: 0 }]
-      });
-
-      for (let i = 1; i <= steps; i++) {
-        const progress = i / steps;
-        // Use easeOut for swipe (fast start, slow end gives momentum feel)
-        const easedProgress = this.easeOut(progress);
-        const currentX = start.x + (end.x - start.x) * easedProgress;
-        const currentY = start.y + (end.y - start.y) * easedProgress;
-
-        await client.send('Input.dispatchTouchEvent', {
-          type: 'touchMove',
-          touchPoints: [{ x: currentX, y: currentY, id: 0 }]
-        });
-
-        await this.page.waitForTimeout(duration / steps);
-      }
-
-      await client.send('Input.dispatchTouchEvent', {
-        type: 'touchEnd',
-        touchPoints: []
-      });
-    } finally {
-      await client.detach();
-    }
+    const steps = Math.max(3, Math.floor(durationMs / 16));
+    await this.pan(start, end, steps);
   }
 
   /**
    * Check if the current browser supports CDP (Chrome DevTools Protocol).
-   * Multi-touch gestures require CDP and only work with Chromium.
-   * @returns true if CDP is supported
+   * Note: This implementation uses JavaScript TouchEvents which work everywhere,
+   * but some features might only work on touch-enabled devices/emulation.
+   * @returns true (always, since we use JS events now)
    */
   async supportsCDP(): Promise<boolean> {
-    try {
-      const client = await this.page.context().newCDPSession(this.page);
-      await client.detach();
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  /**
-   * Easing function for smooth ease-in-out animation.
-   * @param t - Progress value between 0 and 1
-   * @returns Eased value between 0 and 1
-   */
-  private easeInOut(t: number): number {
-    return t < 0.5
-      ? 2 * t * t
-      : 1 - Math.pow(-2 * t + 2, 2) / 2;
-  }
-
-  /**
-   * Easing function for ease-out animation (fast start, slow end).
-   * @param t - Progress value between 0 and 1
-   * @returns Eased value between 0 and 1
-   */
-  private easeOut(t: number): number {
-    return 1 - Math.pow(1 - t, 2);
+    return true;
   }
 }
 
 /**
  * Factory function to create a GestureHelper instance.
  * @param page - Playwright Page object
- * @param canvasSelector - CSS selector for the canvas element (default: 'canvas')
+ * @param canvasSelector - CSS selector for the canvas element (default: '#garden-canvas')
  * @returns GestureHelper instance
  */
 export function createGestureHelper(
   page: Page,
-  canvasSelector: string = 'canvas'
+  canvasSelector: string = '#garden-canvas'
 ): GestureHelper {
   const canvas = page.locator(canvasSelector);
   return new GestureHelper(page, canvas);
