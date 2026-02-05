@@ -4,7 +4,7 @@
  * Initializes all modules and wires up event handlers
  */
 
-import { initCanvas, getCanvas, resetZoom } from './canvas.js';
+import { initCanvas, getCanvas, resetZoom, restoreState, clearSavedState, hasSavedState, setupAutoSave } from './canvas.js';
 import { loadManifest, displayCategory } from './stickers.js';
 import {
     initDrawMode,
@@ -37,6 +37,16 @@ async function init() {
         const canvas = getCanvas();
         initHistoryHooks(canvas);
         console.log('ComGarden: History hooks initialized');
+
+        // Set up auto-save for persistence
+        setupAutoSave();
+        console.log('ComGarden: Auto-save enabled');
+
+        // Restore any previously saved state
+        const restored = await restoreState();
+        if (restored) {
+            console.log('ComGarden: Previous state restored');
+        }
 
         // Load sticker manifest
         await loadManifest();
