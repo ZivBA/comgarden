@@ -5,17 +5,24 @@
  * - initCanvas(): Initialize the canvas with garden photo background
  * - getCanvas(): Get the Fabric.js canvas instance
  * - resetZoom(): Reset zoom to fit the image
+ * - restoreState(): Restore canvas state from localStorage
+ * - clearSavedState(): Clear saved state from localStorage
+ * - hasSavedState(): Check if there is a saved state
+ * - setupAutoSave(): Enable auto-save on canvas changes
  */
 
 let canvas = null;
 let gardenImage = null;
+let saveTimeout = null;
 
 // Configuration
 const CONFIG = {
     minZoom: 0.5,
     maxZoom: 3,
     gardenPhotoPath: 'assets/garden-photo.jpg',
-    fallbackColor: '#8BC34A' // Green fallback if image fails
+    fallbackColor: '#8BC34A', // Green fallback if image fails
+    storageKey: 'comgarden_canvas_state',
+    autoSaveDelay: 1000 // ms debounce delay
 };
 
 /**
@@ -320,4 +327,113 @@ function handleResize() {
     if (gardenImage) {
         loadBackgroundImage().catch(() => {});
     }
+}
+
+// ============================================
+// localStorage Persistence
+// ============================================
+
+/**
+ * Save current canvas state to localStorage (debounced)
+ */
+function saveState() {
+    if (!canvas) return;
+
+    // Clear any pending save
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+    }
+
+    // Debounce the save
+    saveTimeout = setTimeout(() => {
+        try {
+            const state = {
+                objects: canvas.toJSON(['id', 'name', 'stickerType']).objects,
+                viewportTransform: canvas.viewportTransform,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(CONFIG.storageKey, JSON.stringify(state));
+        } catch (error) {
+            console.warn('Failed to save canvas state:', error);
+        }
+    }, CONFIG.autoSaveDelay);
+}
+
+/**
+ * Restore canvas state from localStorage
+ * @returns {Promise<boolean>} True if state was restored
+ */
+export async function restoreState() {
+    if (!canvas) return false;
+
+    try {
+        const stored = localStorage.getItem(CONFIG.storageKey);
+        if (!stored) return false;
+
+        const state = JSON.parse(stored);
+        if (!state.objects || !Array.isArray(state.objects)) return false;
+
+        // Load objects onto canvas
+        return new Promise((resolve) => {
+            fabric.util.enlivenObjects(state.objects, (objects) => {
+                objects.forEach(obj => {
+                    canvas.add(obj);
+                });
+
+                // Restore viewport if saved
+                if (state.viewportTransform) {
+                    canvas.setViewportTransform(state.viewportTransform);
+                }
+
+                canvas.renderAll();
+                resolve(true);
+            });
+        });
+    } catch (error) {
+        console.warn('Failed to restore canvas state:', error);
+        return false;
+    }
+}
+
+/**
+ * Clear saved state from localStorage
+ */
+export function clearSavedState() {
+    try {
+        localStorage.removeItem(CONFIG.storageKey);
+    } catch (error) {
+        console.warn('Failed to clear saved state:', error);
+    }
+}
+
+/**
+ * Check if there is a saved state
+ * @returns {boolean}
+ */
+export function hasSavedState() {
+    try {
+        return localStorage.getItem(CONFIG.storageKey) !== null;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Set up auto-save on canvas changes
+ */
+export function setupAutoSave() {
+    if (!canvas) return;
+
+    // Save when objects are added, modified, or removed
+    canvas.on('object:added', saveState);
+    canvas.on('object:modified', saveState);
+    canvas.on('object:removed', saveState);
+
+    // Also save on viewport changes (zoom/pan)
+    canvas.on('after:render', () => {
+        // Only save if there are objects (don't save empty state after zoom)
+        if (canvas.getObjects().length > 0) {
+            saveState();
+        }
+    });
 }
