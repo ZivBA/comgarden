@@ -200,6 +200,7 @@ html, body {
     display: flex;
     align-items: center;
     padding: var(--spacing-sm) var(--spacing-md);
+    padding-top: 32px; /* Room for sticker name hints */
     gap: var(--spacing-md);
     overflow-x: auto;
     scrollbar-width: none;
