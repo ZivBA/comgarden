@@ -39,6 +39,7 @@ export default defineConfig({
   },
 
   /* Configure projects for major mobile browsers */
+  /* Safari/WebKit requires system libraries only available in CI or properly configured systems */
   projects: [
     {
       name: 'Mobile Chrome',
@@ -47,13 +48,14 @@ export default defineConfig({
         hasTouch: true,
       },
     },
-    {
+    // Only include Safari in CI (GitHub Actions) where WebKit deps are available
+    ...(process.env.CI ? [{
       name: 'Mobile Safari',
       use: {
         ...devices['iPhone 12'],
         hasTouch: true,
       },
-    },
+    }] : []),
   ],
 
   /* Run local dev server before starting the tests */

@@ -1,19 +1,34 @@
 import { test, expect } from '@playwright/test';
 import { GestureHelper } from '../fixtures/gestures';
 
+declare global {
+  interface Window {
+    fabricCanvas: any;
+  }
+}
+
 test.describe('Visual Regression', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, browserName }) => {
+    // Skip non-Chromium browsers (WebKit requires system libraries not available in WSL2)
+    test.skip(browserName !== 'chromium', 'Visual tests require Chromium');
+
     await page.goto('/');
-    // Dismiss onboarding
-    const startBtn = page.locator('#btn-start');
-    if (await startBtn.isVisible()) {
-      await startBtn.click();
-    }
+
+    // Wait for canvas to initialize
+    await page.waitForFunction(() => window.fabricCanvas != null, { timeout: 10000 });
+
+    // Dismiss onboarding - properly wait for button and click
+    await page.click('#btn-start', { timeout: 5000 });
+    await page.waitForTimeout(300);
+
     // Wait for garden photo to load
     await page.waitForFunction(() => {
-      const canvas = (window as any).fabricCanvas;
-      return canvas?.backgroundImage != null;
+      return window.fabricCanvas?.backgroundImage != null;
     }, { timeout: 10000 });
+
+    // Click default category to ensure stickers are loaded
+    await page.click('[data-category="trees-greenery"]');
+    await page.waitForSelector('.sticker-item', { timeout: 10000 });
   });
 
   test('initial canvas state', async ({ page }) => {
@@ -23,8 +38,8 @@ test.describe('Visual Regression', () => {
   });
 
   test('canvas with sticker placed', async ({ page }) => {
-    // Click first sticker in strip to place it
-    await page.click('#sticker-strip img:first-child');
+    // Click first sticker in strip to place it (stickers are divs with class sticker-item)
+    await page.click('.sticker-item:first-child');
     await page.waitForTimeout(500); // Wait for animation
 
     await expect(page).toHaveScreenshot('canvas-with-sticker.png', {
