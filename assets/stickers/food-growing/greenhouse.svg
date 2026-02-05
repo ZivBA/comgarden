@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60">
+  <title>חממה</title>
+  <!-- Greenhouse structure - top-down view -->
+  <rect x="2" y="2" width="86" height="56" rx="4" fill="#B0BEC5" stroke="#78909C" stroke-width="2"/>
+  <!-- Glass panels - translucent -->
+  <rect x="6" y="6" width="38" height="24" fill="#E3F2FD" opacity="0.7"/>
+  <rect x="46" y="6" width="38" height="24" fill="#E3F2FD" opacity="0.7"/>
+  <rect x="6" y="32" width="38" height="22" fill="#E3F2FD" opacity="0.7"/>
+  <rect x="46" y="32" width="38" height="22" fill="#E3F2FD" opacity="0.7"/>
+  <!-- Metal frame lines -->
+  <line x1="45" y1="2" x2="45" y2="58" stroke="#607D8B" stroke-width="2"/>
+  <line x1="2" y1="30" x2="88" y2="30" stroke="#607D8B" stroke-width="2"/>
+  <!-- Plants visible inside -->
+  <circle cx="24" cy="17" r="5" fill="#81C784" opacity="0.8"/>
+  <circle cx="66" cy="17" r="5" fill="#81C784" opacity="0.8"/>
+  <circle cx="24" cy="43" r="5" fill="#81C784" opacity="0.8"/>
+  <circle cx="66" cy="43" r="5" fill="#81C784" opacity="0.8"/>
+</svg>

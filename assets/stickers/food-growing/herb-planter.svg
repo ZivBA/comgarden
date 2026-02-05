@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40">
+  <title>אדנית תבלינים</title>
+  <!-- Planter box -->
+  <rect x="2" y="2" width="56" height="36" rx="3" fill="#A1887F" stroke="#795548" stroke-width="2"/>
+  <!-- Soil -->
+  <rect x="6" y="6" width="48" height="28" rx="2" fill="#4E342E"/>
+  <!-- Herb plants - different greens -->
+  <circle cx="15" cy="14" r="5" fill="#558B2F"/>
+  <circle cx="30" cy="13" r="5" fill="#33691E"/>
+  <circle cx="45" cy="14" r="5" fill="#689F38"/>
+  <circle cx="15" cy="27" r="5" fill="#33691E"/>
+  <circle cx="30" cy="28" r="5" fill="#558B2F"/>
+  <circle cx="45" cy="27" r="5" fill="#7CB342"/>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+  <title>מדורה</title>
+  <!-- Fire pit - top-down view -->
+  <!-- Stone ring -->
+  <circle cx="25" cy="25" r="23" fill="#78909C" stroke="#546E7A" stroke-width="2"/>
+  <!-- Inner pit -->
+  <circle cx="25" cy="25" r="17" fill="#424242"/>
+  <!-- Fire/embers -->
+  <circle cx="25" cy="25" r="12" fill="#BF360C"/>
+  <circle cx="22" cy="22" r="5" fill="#E65100"/>
+  <circle cx="28" cy="24" r="4" fill="#FF6D00"/>
+  <circle cx="24" cy="28" r="4" fill="#FF9100"/>
+  <circle cx="25" cy="25" r="3" fill="#FFAB00"/>
+  <!-- Stone details -->
+  <circle cx="25" cy="4" r="3" fill="#90A4AE"/>
+  <circle cx="40" cy="10" r="3" fill="#90A4AE"/>
+  <circle cx="46" cy="25" r="3" fill="#90A4AE"/>
+  <circle cx="40" cy="40" r="3" fill="#90A4AE"/>
+  <circle cx="25" cy="46" r="3" fill="#90A4AE"/>
+  <circle cx="10" cy="40" r="3" fill="#90A4AE"/>
+  <circle cx="4" cy="25" r="3" fill="#90A4AE"/>
+  <circle cx="10" cy="10" r="3" fill="#90A4AE"/>
+</svg>

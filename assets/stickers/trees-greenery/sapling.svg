@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <title>שתיל</title>
+  <!-- Small tree canopy - top-down view -->
+  <circle cx="20" cy="20" r="16" fill="#4CAF50"/>
+  <circle cx="15" cy="15" r="7" fill="#66BB6A"/>
+  <circle cx="25" cy="17" r="6" fill="#81C784"/>
+  <circle cx="18" cy="25" r="6" fill="#66BB6A"/>
+  <!-- Trunk center -->
+  <circle cx="20" cy="20" r="3" fill="#795548"/>
+</svg>

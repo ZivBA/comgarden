@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <title>אמבט ציפורים</title>
+  <!-- Bird bath - top-down view -->
+  <!-- Outer basin -->
+  <circle cx="20" cy="20" r="18" fill="#78909C" stroke="#546E7A" stroke-width="2"/>
+  <!-- Inner basin with water -->
+  <circle cx="20" cy="20" r="14" fill="#90CAF9"/>
+  <!-- Water surface -->
+  <circle cx="20" cy="20" r="11" fill="#64B5F6"/>
+  <!-- Center pedestal (visible from above) -->
+  <circle cx="20" cy="20" r="4" fill="#607D8B"/>
+  <!-- Water ripples -->
+  <circle cx="20" cy="20" r="8" fill="none" stroke="#BBDEFB" stroke-width="0.5" opacity="0.6"/>
+</svg>

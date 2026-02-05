@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
+  <title>מנורת גן</title>
+  <!-- Garden lamp - top-down view -->
+  <!-- Light glow -->
+  <circle cx="15" cy="15" r="13" fill="#FFF9C4" opacity="0.4"/>
+  <circle cx="15" cy="15" r="9" fill="#FFEE58" opacity="0.5"/>
+  <!-- Lamp housing -->
+  <circle cx="15" cy="15" r="6" fill="#424242" stroke="#212121" stroke-width="1"/>
+  <!-- Light source -->
+  <circle cx="15" cy="15" r="4" fill="#FDD835"/>
+  <!-- Pole top -->
+  <circle cx="15" cy="15" r="2" fill="#212121"/>
+</svg>

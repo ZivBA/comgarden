@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70">
+  <title>גזיבו</title>
+  <!-- Gazebo - top-down hexagonal/octagonal view -->
+  <!-- Roof outline -->
+  <polygon points="35,5 60,20 60,50 35,65 10,50 10,20" fill="#8D6E63" stroke="#6D4C41" stroke-width="2"/>
+  <!-- Inner floor -->
+  <polygon points="35,12 52,23 52,47 35,58 18,47 18,23" fill="#BCAAA4"/>
+  <!-- Support posts at corners -->
+  <circle cx="35" cy="12" r="3" fill="#5D4037"/>
+  <circle cx="52" cy="23" r="3" fill="#5D4037"/>
+  <circle cx="52" cy="47" r="3" fill="#5D4037"/>
+  <circle cx="35" cy="58" r="3" fill="#5D4037"/>
+  <circle cx="18" cy="47" r="3" fill="#5D4037"/>
+  <circle cx="18" cy="23" r="3" fill="#5D4037"/>
+  <!-- Center roof peak -->
+  <circle cx="35" cy="35" r="5" fill="#795548"/>
+</svg>

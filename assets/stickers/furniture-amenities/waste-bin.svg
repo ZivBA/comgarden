@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
+  <title>פח אשפה</title>
+  <!-- Waste bin - top-down view -->
+  <!-- Bin body -->
+  <circle cx="15" cy="15" r="13" fill="#455A64" stroke="#37474F" stroke-width="2"/>
+  <!-- Lid -->
+  <circle cx="15" cy="15" r="10" fill="#546E7A"/>
+  <!-- Lid handle/opening -->
+  <ellipse cx="15" cy="12" rx="5" ry="3" fill="#37474F"/>
+  <!-- Lid hinge -->
+  <rect x="10" y="20" width="10" height="2" fill="#37474F" rx="1"/>
+</svg>

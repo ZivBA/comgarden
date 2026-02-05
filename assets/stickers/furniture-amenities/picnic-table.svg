@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 50">
+  <title>שולחן פיקניק</title>
+  <!-- Picnic table - top-down view -->
+  <!-- Bench 1 -->
+  <rect x="2" y="4" width="66" height="10" rx="2" fill="#A1887F" stroke="#795548" stroke-width="1"/>
+  <!-- Table top -->
+  <rect x="8" y="16" width="54" height="18" rx="2" fill="#8D6E63" stroke="#6D4C41" stroke-width="2"/>
+  <!-- Bench 2 -->
+  <rect x="2" y="36" width="66" height="10" rx="2" fill="#A1887F" stroke="#795548" stroke-width="1"/>
+  <!-- Table planks -->
+  <line x1="10" y1="22" x2="60" y2="22" stroke="#795548" stroke-width="1"/>
+  <line x1="10" y1="28" x2="60" y2="28" stroke="#795548" stroke-width="1"/>
+  <!-- Bench planks -->
+  <line x1="4" y1="9" x2="66" y2="9" stroke="#8D6E63" stroke-width="0.5"/>
+  <line x1="4" y1="41" x2="66" y2="41" stroke="#8D6E63" stroke-width="0.5"/>
+</svg>

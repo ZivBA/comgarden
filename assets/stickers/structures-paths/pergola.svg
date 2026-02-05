@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <title>פרגולה</title>
+  <!-- Pergola - top-down view showing beams -->
+  <!-- Outer frame -->
+  <rect x="4" y="4" width="72" height="72" fill="none" stroke="#8D6E63" stroke-width="4"/>
+  <!-- Horizontal beams -->
+  <line x1="4" y1="20" x2="76" y2="20" stroke="#A1887F" stroke-width="3"/>
+  <line x1="4" y1="40" x2="76" y2="40" stroke="#A1887F" stroke-width="3"/>
+  <line x1="4" y1="60" x2="76" y2="60" stroke="#A1887F" stroke-width="3"/>
+  <!-- Vertical support posts (corners) -->
+  <rect x="4" y="4" width="8" height="8" fill="#6D4C41"/>
+  <rect x="68" y="4" width="8" height="8" fill="#6D4C41"/>
+  <rect x="4" y="68" width="8" height="8" fill="#6D4C41"/>
+  <rect x="68" y="68" width="8" height="8" fill="#6D4C41"/>
+  <!-- Shadow/ground area -->
+  <rect x="12" y="12" width="56" height="56" fill="#E8F5E9" opacity="0.3"/>
+</svg>

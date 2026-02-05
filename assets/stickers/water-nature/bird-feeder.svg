@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
+  <title>מאכיל ציפורים</title>
+  <!-- Bird feeder - top-down view -->
+  <!-- Roof (hexagonal) -->
+  <polygon points="15,2 26,8 26,22 15,28 4,22 4,8" fill="#8D6E63" stroke="#6D4C41" stroke-width="1"/>
+  <!-- Feeding tray -->
+  <circle cx="15" cy="15" r="8" fill="#A1887F"/>
+  <!-- Seeds -->
+  <circle cx="12" cy="13" r="1.5" fill="#FFC107"/>
+  <circle cx="17" cy="14" r="1.5" fill="#FFC107"/>
+  <circle cx="14" cy="17" r="1.5" fill="#FFC107"/>
+  <circle cx="18" cy="18" r="1.5" fill="#FFC107"/>
+  <!-- Center pole -->
+  <circle cx="15" cy="15" r="2" fill="#5D4037"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60">
+  <title>ערוגת פרחים עגולה</title>
+  <!-- Circular bed border -->
+  <circle cx="30" cy="30" r="28" fill="#8D6E63" stroke="#6D4C41" stroke-width="2"/>
+  <!-- Soil -->
+  <circle cx="30" cy="30" r="24" fill="#5D4037"/>
+  <!-- Flowers arranged in circle -->
+  <circle cx="30" cy="14" r="4" fill="#E91E63"/>
+  <circle cx="44" cy="22" r="4" fill="#FF9800"/>
+  <circle cx="44" cy="38" r="4" fill="#9C27B0"/>
+  <circle cx="30" cy="46" r="4" fill="#FFEB3B"/>
+  <circle cx="16" cy="38" r="4" fill="#F44336"/>
+  <circle cx="16" cy="22" r="4" fill="#E91E63"/>
+  <!-- Center flower -->
+  <circle cx="30" cy="30" r="5" fill="#FF5722"/>
+</svg>

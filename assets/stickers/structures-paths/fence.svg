@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20">
+  <title>גדר</title>
+  <!-- Fence - top-down view showing width -->
+  <!-- Main rail -->
+  <rect x="2" y="6" width="96" height="8" fill="#A1887F" stroke="#795548" stroke-width="1"/>
+  <!-- Fence posts -->
+  <rect x="2" y="2" width="6" height="16" fill="#6D4C41"/>
+  <rect x="22" y="2" width="6" height="16" fill="#6D4C41"/>
+  <rect x="42" y="2" width="6" height="16" fill="#6D4C41"/>
+  <rect x="62" y="2" width="6" height="16" fill="#6D4C41"/>
+  <rect x="82" y="2" width="6" height="16" fill="#6D4C41"/>
+  <!-- Post tops -->
+  <circle cx="5" cy="4" r="2" fill="#5D4037"/>
+  <circle cx="25" cy="4" r="2" fill="#5D4037"/>
+  <circle cx="45" cy="4" r="2" fill="#5D4037"/>
+  <circle cx="65" cy="4" r="2" fill="#5D4037"/>
+  <circle cx="85" cy="4" r="2" fill="#5D4037"/>
+</svg>

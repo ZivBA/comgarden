@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 50">
+  <title>מחסן</title>
+  <!-- Shed - top-down view -->
+  <!-- Roof -->
+  <rect x="2" y="2" width="56" height="46" rx="2" fill="#78909C" stroke="#546E7A" stroke-width="2"/>
+  <!-- Roof ridge line -->
+  <line x1="30" y1="2" x2="30" y2="48" stroke="#607D8B" stroke-width="3"/>
+  <!-- Roof panels -->
+  <rect x="4" y="4" width="24" height="42" fill="#90A4AE" opacity="0.5"/>
+  <rect x="32" y="4" width="24" height="42" fill="#B0BEC5" opacity="0.5"/>
+  <!-- Door indicator (from above) -->
+  <rect x="22" y="38" width="16" height="10" fill="#455A64"/>
+  <circle cx="35" cy="43" r="1.5" fill="#263238"/>
+</svg>
