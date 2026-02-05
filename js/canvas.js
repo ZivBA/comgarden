@@ -119,6 +119,7 @@ function setupTouchGestures() {
     let isPinching = false;
     let isPanning = false;
     let lastPanPoint = null;
+    let isTouchActive = false;  // Flag to prevent desktop handlers from running on touch
 
     // Mouse wheel zoom for desktop
     canvas.on('mouse:wheel', (opt) => {
@@ -132,8 +133,11 @@ function setupTouchGestures() {
         opt.e.stopPropagation();
     });
 
-    // Desktop: Pan when clicking on empty space, shift+drag, or middle mouse
+    // Desktop-only: Pan when clicking on empty space, shift+drag, or middle mouse
     canvas.on('mouse:down', (opt) => {
+        // Skip if this is a touch event (handled by touch handlers below)
+        if (isTouchActive) return;
+
         const e = opt.e;
         // Pan if: no target clicked, OR shift key held, OR middle mouse button
         if (!opt.target || e.shiftKey || e.button === 1) {
@@ -144,9 +148,11 @@ function setupTouchGestures() {
     });
 
     canvas.on('mouse:move', (opt) => {
+        // Skip if this is a touch event
+        if (isTouchActive) return;
+
         if (isPanning && lastPanPoint) {
             const e = opt.e;
-            // Create a copy of the viewport transform to avoid issues
             const vpt = canvas.viewportTransform.slice();
             vpt[4] += e.clientX - lastPanPoint.x;
             vpt[5] += e.clientY - lastPanPoint.y;
@@ -157,31 +163,42 @@ function setupTouchGestures() {
     });
 
     canvas.on('mouse:up', () => {
-        isPanning = false;
-        lastPanPoint = null;
-        canvas.setCursor('default');
+        // Only reset desktop pan state if not touch
+        if (!isTouchActive) {
+            isPanning = false;
+            lastPanPoint = null;
+            canvas.setCursor('default');
+        }
     });
 
-    // Mobile touch handling - use Fabric events to not interfere with object manipulation
+    // Mobile touch handling
     let touchStartTarget = null;
     let mobilePanStartPoint = null;
-
-    canvas.on('mouse:down', (opt) => {
-        // Track if we started on an object (for mobile)
-        touchStartTarget = opt.target;
-    });
-
-    // For pinch zoom and mobile pan, we need direct touch events
     const upperCanvas = canvas.upperCanvasEl;
 
     upperCanvas.addEventListener('touchstart', (e) => {
+        isTouchActive = true;  // Mark that we're handling touch
+
+        // Check if we're touching an object using Fabric's method
+        const rect = upperCanvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const pointer = canvas.getPointer({
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        }, true);
+        touchStartTarget = canvas.findTarget({
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            offsetX: touch.clientX - rect.left,
+            offsetY: touch.clientY - rect.top
+        });
+
         if (e.touches.length === 2) {
             isPinching = true;
             lastPinchDistance = 0;
         } else if (e.touches.length === 1) {
-            // Store the starting point for potential pan
-            const touch = e.touches[0];
             mobilePanStartPoint = { x: touch.clientX, y: touch.clientY };
+            lastPanPoint = null;  // Reset for fresh pan
         }
     }, { passive: true });
 
@@ -218,14 +235,12 @@ function setupTouchGestures() {
             const touch = e.touches[0];
             const currentPoint = { x: touch.clientX, y: touch.clientY };
 
-            // Calculate delta from the last known point (or start point)
+            // Use mobilePanStartPoint for first move, then lastPanPoint
             const refPoint = lastPanPoint || mobilePanStartPoint;
             const deltaX = currentPoint.x - refPoint.x;
             const deltaY = currentPoint.y - refPoint.y;
 
-            // Only pan if we have valid deltas
-            if (isFinite(deltaX) && isFinite(deltaY)) {
-                // Create a copy of the viewport transform
+            if (isFinite(deltaX) && isFinite(deltaY) && (Math.abs(deltaX) < 1000 && Math.abs(deltaY) < 1000)) {
                 const vpt = canvas.viewportTransform.slice();
                 vpt[4] += deltaX;
                 vpt[5] += deltaY;
@@ -241,12 +256,15 @@ function setupTouchGestures() {
 
     upperCanvas.addEventListener('touchend', (e) => {
         if (e.touches.length === 0) {
+            // All fingers lifted - reset everything
             isPinching = false;
             isPanning = false;
             lastPinchDistance = 0;
             lastPanPoint = null;
             touchStartTarget = null;
             mobilePanStartPoint = null;
+            // Delay resetting isTouchActive to prevent mouse events from firing
+            setTimeout(() => { isTouchActive = false; }, 100);
         } else if (e.touches.length === 1) {
             isPinching = false;
             lastPinchDistance = 0;
